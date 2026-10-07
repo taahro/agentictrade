@@ -234,6 +234,6 @@ class CapabilityDeliveryContract:
             output_schema=dict(card.output_schema),
             sla=dict(card.sla),
             terms=dict(offer.terms),
-            deadline=offer.expires_at,
+            deadline=str(offer.terms.get("delivery_deadline", "")),
             status="accepted",
         )
