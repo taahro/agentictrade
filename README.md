@@ -342,6 +342,33 @@ This branch introduces the first capability-economy substrate:
 
 The implementation deliberately remains transport- and payment-neutral so the existing AgenticTrade rails can handle execution.
 
+### Phase 4 — Agent Chains
+
+The capability economy can now compose specialist agents into deterministic chains. A buyer defines an objective as a dependency graph, purchases each capability through the existing autonomous buyer, and explicitly passes outputs into downstream agents.
+
+```
+Objective
+    ↓
+Plan
+    ↓
+Market Data Agent → Risk Agent → Decision Agent
+          ↓              ↓
+       receipt        receipt
+             \__________/
+                   ↓
+          auditable chain result
+```
+
+Phase 4 introduces:
+
+- `CapabilityChainStep` — one purchased capability plus explicit dependencies and input bindings
+- `CapabilityChainPlan` — objective, graph, currency, and optional chain-level budget
+- `CapabilityChainExecutor` — deterministic topological execution using the existing buyer or an injected runner
+- fail-closed chain budgeting and stop-on-failure behavior
+- explicit output references such as `$steps.market.output.price`
+
+A chain is orchestration, not a new marketplace. Discovery, policy, CDP/x402 payment, provider execution, settlement, and receipts remain on the existing AgenticTrade substrate.
+
 ### Roadmap
 
 | Phase | Direction |
