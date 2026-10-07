@@ -346,9 +346,9 @@ The implementation deliberately remains transport- and payment-neutral so the ex
 
 | Phase | Direction |
 |---|---|
-| **1. Capability substrate** | Machine-readable needs, offers, requests, receipts, deterministic matching **← current** |
-| **2. Autonomous buyer** | Connect buyer SDK + policy evaluator + automatic quote acceptance + existing payment/escrow |
-| **3. Provider agent** | Capability cards, schemas, SLA/terms, quote generation and delivery contracts |
+| **1. Capability substrate** | Machine-readable needs, offers, requests, receipts, deterministic matching ✅ |
+| **2. Autonomous buyer** | Buyer SDK + deterministic policy + CDP wallet + x402 payment path ✅ |
+| **3. Provider capability layer** | Capability cards, schemas, SLA/terms, provider quotes and delivery contracts **← current** |
 | **4. Agent chains** | Composition, subcontracting, verification and composite capability publication |
 | **5. Agent economy** | Outcome-based reputation, dynamic pricing, specialization, referrals, resale/composition and cross-agent accounting |
 
