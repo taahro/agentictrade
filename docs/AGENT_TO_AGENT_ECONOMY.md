@@ -122,18 +122,20 @@ No capability purchase should silently expand an agent's authority.
 
 Runtime exposure through the Provider Agent is the next Phase 3 increment.
 
-### Phase 4 — agent chains
-- capability composition
-- subcontracting
-- result verification
-- composite service publication
+### Phase 4 — agent chains ✅
+- deterministic capability composition
+- dependency graphs and explicit output handoff
+- chain-level budget guards
+- auditable chain execution
 
-### Phase 5 — economy
+### Phase 5 — economy ✅
 - reputation based on capability outcomes
-- dynamic pricing
-- provider specialization
+- bounded dynamic pricing
+- provider specialization through explicit composite capability provenance
 - agent-to-agent referrals
-- capability arbitrage/resale
-- cross-agent accounting
+- capability composition/resale
+- cross-agent accounting projection
+
+Implemented in `marketplace/economy.py`. The economic layer records attribution and policy decisions; actual funds movement remains on the existing x402, escrow, and settlement rails.
 
 Do not replace the existing marketplace or payment architecture. Extend it.
