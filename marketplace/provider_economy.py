@@ -52,6 +52,26 @@ class CapabilityCard:
     version: str = "1.0"
     active: bool = True
 
+    def as_dict(self) -> dict[str, Any]:
+        """Return a JSON-ready machine-readable capability card."""
+        return {
+            "capability_id": self.capability_id,
+            "provider_id": self.provider_id,
+            "service_id": self.service_id,
+            "name": self.name,
+            "description": self.description,
+            "category": self.category,
+            "tags": list(self.tags),
+            "input_schema": dict(self.input_schema),
+            "output_schema": dict(self.output_schema),
+            "pricing": {"price": str(self.price), "currency": self.currency},
+            "delivery_modes": list(self.delivery_modes),
+            "sla": dict(self.sla),
+            "terms": dict(self.terms),
+            "version": self.version,
+            "active": self.active,
+        }
+
     def validate(self) -> None:
         """Validate the provider's public capability contract."""
         if not self.capability_id.strip():
@@ -200,6 +220,25 @@ class CapabilityDeliveryContract:
     terms: Mapping[str, Any] = field(default_factory=dict)
     deadline: str = ""
     status: str = "accepted"
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return a JSON-ready delivery contract."""
+        return {
+            "contract_id": self.contract_id,
+            "request_id": self.request_id,
+            "buyer_id": self.buyer_id,
+            "provider_id": self.provider_id,
+            "service_id": self.service_id,
+            "capability_id": self.capability_id,
+            "capability_version": self.capability_version,
+            "pricing": {"price": str(self.price), "currency": self.currency},
+            "delivery": self.delivery,
+            "output_schema": dict(self.output_schema),
+            "sla": dict(self.sla),
+            "terms": dict(self.terms),
+            "deadline": self.deadline,
+            "status": self.status,
+        }
 
     @classmethod
     def from_acceptance(
