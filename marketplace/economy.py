@@ -297,6 +297,12 @@ class EconomyLedger:
         if value < 0 or fee < 0 or fee > value:
             raise ValueError("purchase_amount_invalid")
 
+        referral_reward = Decimal("0")
+        if referral_id and referral_policy is not None:
+            referral_reward = referral_policy.reward(value)
+            if referral_reward > (value - fee):
+                raise ValueError("referral_reward_exceeds_provider_revenue")
+
         entries = [
             EconomyEntry(
                 transaction_id=tx,
@@ -313,7 +319,7 @@ class EconomyLedger:
                 agent_id=provider_id,
                 counterparty_id=buyer_id,
                 direction="credit",
-                amount=value - fee,
+                amount=value - fee - referral_reward,
                 currency=currency,
                 entry_type="capability_revenue",
                 reference_id=reference_id,
@@ -334,10 +340,8 @@ class EconomyLedger:
             )
 
         if referral_id and referral_policy is not None:
-            reward = referral_policy.reward(value)
+            reward = referral_reward
             if reward > 0:
-                if reward > (value - fee):
-                    raise ValueError("referral_reward_exceeds_provider_revenue")
                 entries.append(
                     EconomyEntry(
                         transaction_id=tx,
