@@ -19,6 +19,13 @@ Full client:
 """
 from sdk.client import ACFClient, ACFError
 from sdk.agent import AgenticTradeAgent, AgenticTradeError, OnboardResult
+from marketplace.capability_chains import (
+    CapabilityChainError,
+    CapabilityChainExecutor,
+    CapabilityChainPlan,
+    CapabilityChainResult,
+    CapabilityChainStep,
+)
 from marketplace.provider_economy import (
     CapabilityCard,
     CapabilityDeliveryContract,
@@ -46,4 +53,9 @@ __all__ = [
     "CapabilityCard",
     "CapabilityDeliveryContract",
     "ProviderQuotePolicy",
+    "CapabilityChainError",
+    "CapabilityChainExecutor",
+    "CapabilityChainPlan",
+    "CapabilityChainResult",
+    "CapabilityChainStep",
 ]
