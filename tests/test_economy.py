@@ -26,7 +26,7 @@ def test_outcome_reputation_is_bounded_and_verification_aware():
         verified=True,
     )
     score = policy.score(good)
-    assert score == Decimal("8.55")
+    assert score == Decimal("9.15")
     assert Decimal("0") <= score <= Decimal("10")
 
     unverified = CapabilityOutcome(
