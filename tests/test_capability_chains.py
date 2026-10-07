@@ -34,7 +34,7 @@ def test_chain_orders_dependencies_deterministically():
     assert plan.execution_order() == ("market", "risk", "final")
 
 
-def test_chain_rejects_cycles_and_unknown_dependencies():
+def test_chain_rejects_cycles_unknown_dependencies_and_implicit_bindings():
     cyc = CapabilityChainPlan(
         buyer_id="buyer",
         objective="cycle",
@@ -53,6 +53,21 @@ def test_chain_rejects_cycles_and_unknown_dependencies():
     )
     with pytest.raises(CapabilityChainError, match="unknown_dependency"):
         missing.validate()
+
+    implicit = CapabilityChainPlan(
+        buyer_id="buyer",
+        objective="implicit dependency",
+        steps=(
+            step("source", "Source"),
+            step(
+                "consumer",
+                "Consumer",
+                input_bindings={"data": "$steps.source.output"},
+            ),
+        ),
+    )
+    with pytest.raises(CapabilityChainError, match="binding_requires_dependency"):
+        implicit.validate()
 
 
 @pytest.mark.asyncio
@@ -117,10 +132,10 @@ async def test_chain_blocks_step_when_remaining_budget_is_too_small():
     plan = CapabilityChainPlan(
         buyer_id="buyer",
         objective="budget guarded chain",
-        max_total_price=Decimal("0.006"),
+        max_total_price=Decimal("0.004"),
         steps=(
-            step("one", "One", max_price=0.004),
-            step("two", "Two", max_price=0.004, depends_on=("one",)),
+            step("one", "One", max_price=0.002),
+            step("two", "Two", max_price=0.002, depends_on=("one",)),
         ),
     )
 
@@ -129,7 +144,7 @@ async def test_chain_blocks_step_when_remaining_budget_is_too_small():
         return SimpleNamespace(
             success=True,
             response={current.step_id: True},
-            amount_usdc="0.004",
+            amount_usdc="0.002",
             receipt=current.step_id,
         )
 
@@ -139,7 +154,7 @@ async def test_chain_blocks_step_when_remaining_budget_is_too_small():
     assert result.completed_steps == ("one",)
     assert result.failed_step == "two"
     assert calls == ["one"]
-    assert result.total_spent_usdc == Decimal("0.004")
+    assert result.total_spent_usdc == Decimal("0.002")
 
 
 @pytest.mark.asyncio
