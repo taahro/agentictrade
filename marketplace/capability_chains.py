@@ -45,6 +45,23 @@ class CapabilityChainStep:
             if not str(source).startswith("$"):
                 raise CapabilityChainError("binding_source_must_be_reference")
 
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "step_id": self.step_id,
+            "need": {
+                "name": self.need.name,
+                "description": self.need.description,
+                "category": self.need.category,
+                "tags": list(self.need.tags),
+                "input_schema": dict(self.need.input_schema),
+                "output_schema": dict(self.need.output_schema),
+                "max_price": self.need.max_price,
+                "currency": self.need.currency,
+            },
+            "depends_on": list(self.depends_on),
+            "input_bindings": dict(self.input_bindings),
+        }
+
 
 @dataclass(frozen=True)
 class CapabilityChainPlan:
@@ -81,6 +98,14 @@ class CapabilityChainPlan:
             for dependency in step.depends_on:
                 if dependency not in ids:
                     raise CapabilityChainError("unknown_dependency")
+            for source in step.input_bindings.values():
+                if source.startswith("$steps."):
+                    parts = source.split(".")
+                    if len(parts) < 3 or parts[2] != "output":
+                        raise CapabilityChainError("invalid_step_reference")
+                    dependency = parts[1]
+                    if dependency not in step.depends_on:
+                        raise CapabilityChainError("binding_requires_dependency")
 
         if self.max_total_price is not None:
             try:
@@ -125,6 +150,20 @@ class CapabilityChainPlan:
             visit(step.step_id)
         return tuple(order)
 
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "chain_id": self.chain_id,
+            "buyer_id": self.buyer_id,
+            "objective": self.objective,
+            "currency": self.currency,
+            "max_total_price": (
+                str(self.max_total_price) if self.max_total_price is not None else None
+            ),
+            "steps": [step.as_dict() for step in self.steps],
+            "execution_order": list(self.execution_order()),
+            "metadata": dict(self.metadata),
+        }
+
 
 @dataclass(frozen=True)
 class CapabilityChainResult:
@@ -141,6 +180,20 @@ class CapabilityChainResult:
     total_spent_usdc: Decimal = Decimal("0")
     failed_step: str | None = None
     error: str = ""
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "chain_id": self.chain_id,
+            "buyer_id": self.buyer_id,
+            "objective": self.objective,
+            "status": self.status,
+            "completed_steps": list(self.completed_steps),
+            "outputs": dict(self.outputs),
+            "receipts": list(self.receipts),
+            "total_spent_usdc": str(self.total_spent_usdc),
+            "failed_step": self.failed_step,
+            "error": self.error,
+        }
 
 
 StepRunner = Callable[
