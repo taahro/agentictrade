@@ -106,16 +106,21 @@ No capability purchase should silently expand an agent's authority.
 - request/offer/receipt contracts
 - tests
 
-### Phase 2 — autonomous buyer
-- connect buyer SDK to capability discovery
-- policy evaluator
-- automatic quote acceptance
-- existing payment/escrow integration
+### Phase 2 — autonomous buyer ✅
+- connected buyer SDK to capability discovery
+- deterministic purchase policy
+- automatic marketplace-price quote acceptance
+- x402 payment path with CDP-managed EVM wallet
+- policy checks before signing
 
-### Phase 3 — provider agent
+### Phase 3 — provider capability layer 🚧 current
 - machine-readable capability cards
-- capability-specific schemas and SLA
-- automated quote generation
+- capability-specific input/output schemas
+- SLA and provider terms
+- automated provider quote generation
+- accepted-offer delivery contracts
+
+Runtime exposure through the Provider Agent is the next Phase 3 increment.
 
 ### Phase 4 — agent chains
 - capability composition
