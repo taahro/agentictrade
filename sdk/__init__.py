@@ -26,6 +26,15 @@ from marketplace.capability_chains import (
     CapabilityChainResult,
     CapabilityChainStep,
 )
+from marketplace.economy import (
+    CapabilityOutcome,
+    CompositeCapability,
+    DynamicPricingPolicy,
+    EconomyEntry,
+    EconomyLedger,
+    OutcomeReputationPolicy,
+    ReferralPolicy,
+)
 from marketplace.provider_economy import (
     CapabilityCard,
     CapabilityDeliveryContract,
@@ -58,4 +67,11 @@ __all__ = [
     "CapabilityChainPlan",
     "CapabilityChainResult",
     "CapabilityChainStep",
+    "CapabilityOutcome",
+    "CompositeCapability",
+    "DynamicPricingPolicy",
+    "EconomyEntry",
+    "EconomyLedger",
+    "OutcomeReputationPolicy",
+    "ReferralPolicy",
 ]
