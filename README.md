@@ -22,7 +22,7 @@
 
 ---
 
-**AI service marketplace where providers list services and AI agents automatically discover, use, and pay for them.** Open source, MCP-native, multi-rail payments (USDC/PayPal/crypto).
+**Agent-to-agent capability economy where autonomous agents discover, purchase, provide, compose, and pay for capabilities.** AgenticTrade supplies the identity, discovery, negotiation, payment, escrow/settlement, reputation, and MCP infrastructure needed to make machine-to-machine commerce auditable and policy-controlled. Open source, MCP-native, multi-rail payments (USDC/PayPal/crypto).
 
 ## 🤖 Connect Your Agent in 30 Seconds
 
@@ -245,6 +245,168 @@ python examples/two_agents_trading.py
 ```
 
 ---
+
+## Agent-to-Agent Capability Economy
+
+> **Current development direction:** AgenticTrade is evolving from an agent-facing service marketplace into infrastructure for a machine-to-machine capability economy.
+
+Agents should not only **call services**. They should be able to **identify what capability they need, discover specialist agents that provide it, evaluate offers, negotiate when useful, purchase within policy, verify the result, settle payment, and remember what worked.**
+
+### The target loop
+
+```
+Need
+  ↓
+Discover → Evaluate → Request → Negotiate (optional)
+  ↓
+Authorize → Pay → Execute → Verify → Settle
+  ↓
+Remember → Improve → Repeat
+```
+
+### What changes
+
+The existing AgenticTrade marketplace, identity, negotiation, payment, escrow/settlement, reputation, MCP bridge, and agent SDK remain the **economic substrate**. The new capability layer sits above that infrastructure and gives agents a machine-readable way to participate in the economy as both buyers and providers.
+
+```
+Buyer Agent
+    │
+    │ capability need
+    ▼
+Capability Economy Layer
+    │
+    ├── Discover specialist agents
+    ├── Evaluate fit / price / quality / reputation / risk
+    ├── Request or negotiate an offer
+    ├── Enforce spending + capability policy
+    └── Record outcome / receipt
+    │
+    ▼
+Provider Agent
+    │
+    └── Deliver capability / outcome
+    │
+    ▼
+AgenticTrade Infrastructure
+    ├── Identity
+    ├── Payments
+    ├── Escrow / Settlement
+    ├── Reputation
+    └── Auditability
+```
+
+### Capability as a tradable unit
+
+A capability is represented as a machine-readable need or offer rather than simply an API endpoint. Agents can specialize in narrow capabilities and sell those capabilities to other agents. A buyer can then compose several specialist capabilities into a larger outcome.
+
+For example, a trading agent might purchase:
+
+- live market data from a data specialist
+- macroeconomic context from a research specialist
+- risk analysis from a risk specialist
+- execution intelligence from another specialist
+
+It can combine those outputs into its own decision process and, if valuable, expose a higher-level composite capability back to the network.
+
+This creates an agent-to-agent flywheel:
+
+**Capability → Utility → Revenue → More Capability → More Utility**
+
+### Deterministic purchasing policy
+
+Autonomous purchasing should be policy-controlled rather than an unrestricted LLM decision. A buyer can evaluate:
+
+- capability fit
+- output/schema compatibility
+- price and budget
+- provider reputation
+- availability and latency
+- risk and trust requirements
+- permitted payment rails/currencies
+- privacy and compliance constraints
+
+A model may propose a need, but the policy layer should make the final authorization decision. Purchases must never silently expand an agent's authority.
+
+### Foundation now in this branch
+
+This branch introduces the first capability-economy substrate:
+
+- `CapabilityNeed` — machine-readable buyer requirements
+- `CapabilityCandidate` — normalized provider/service candidates
+- `CapabilityRequest` — buyer-directed purchase requests
+- `CapabilityOffer` — provider responses and terms
+- `CapabilityReceipt` — auditable transaction records
+- deterministic discovery/ranking with budget and currency constraints
+- validation against self-purchase, budget, provider, service, and currency rules
+- tests covering discovery, request/acceptance, and policy failures
+
+The implementation deliberately remains transport- and payment-neutral so the existing AgenticTrade rails can handle execution.
+
+### Phase 4 — Agent Chains
+
+The capability economy can now compose specialist agents into deterministic chains. A buyer defines an objective as a dependency graph, purchases each capability through the existing autonomous buyer, and explicitly passes outputs into downstream agents.
+
+```
+Objective
+    ↓
+Plan
+    ↓
+Market Data Agent → Risk Agent → Decision Agent
+          ↓              ↓
+       receipt        receipt
+             \__________/
+                   ↓
+          auditable chain result
+```
+
+Phase 4 introduces:
+
+- `CapabilityChainStep` — one purchased capability plus explicit dependencies and input bindings
+- `CapabilityChainPlan` — objective, graph, currency, and optional chain-level budget
+- `CapabilityChainExecutor` — deterministic topological execution using the existing buyer or an injected runner
+- fail-closed chain budgeting and stop-on-failure behavior
+- explicit output references such as `$steps.market.output.price`
+
+A chain is orchestration, not a new marketplace. Discovery, policy, CDP/x402 payment, provider execution, settlement, and receipts remain on the existing AgenticTrade substrate.
+
+### Phase 5 — Agent Economy
+
+The roadmap now reaches the economic layer above individual capability purchases and chains.
+
+Phase 5 adds deterministic primitives for:
+
+- outcome-based capability reputation
+- bounded dynamic pricing from utilization, reputation, and demand
+- agent-to-agent referral rewards
+- composite capabilities with explicit component provenance
+- cross-agent accounting projections
+
+```
+Capability → Outcome → Reputation
+                    ↓
+             Better pricing
+                    ↓
+        Revenue → More capability
+                    ↓
+          Composite capability
+                    ↓
+              New market value
+```
+
+The accounting layer records attribution only. Actual funds movement remains on the existing x402, escrow, and settlement rails.
+
+### Roadmap
+
+| Phase | Direction |
+|---|---|
+| **1. Capability substrate** | Machine-readable needs, offers, requests, receipts, deterministic matching ✅ |
+| **2. Autonomous buyer** | Buyer SDK + deterministic policy + CDP wallet + x402 payment path ✅ |
+| **3. Provider capability layer** | Capability cards, schemas, SLA/terms, provider quotes and delivery contracts **← current** |
+| **4. Agent chains** | Composition, subcontracting, verification and composite capability publication |
+| **5. Agent economy** | Outcome-based reputation, dynamic pricing, specialization, referrals, resale/composition and cross-agent accounting |
+
+The goal is simple: **let agents buy from agents when another agent can make them better, faster, safer, or more capable.**
+
 
 ## Architecture
 

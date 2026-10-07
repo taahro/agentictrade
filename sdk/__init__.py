@@ -19,6 +19,34 @@ Full client:
 """
 from sdk.client import ACFClient, ACFError
 from sdk.agent import AgenticTradeAgent, AgenticTradeError, OnboardResult
+from marketplace.capability_chains import (
+    CapabilityChainError,
+    CapabilityChainExecutor,
+    CapabilityChainPlan,
+    CapabilityChainResult,
+    CapabilityChainStep,
+)
+from marketplace.economy import (
+    CapabilityOutcome,
+    CompositeCapability,
+    DynamicPricingPolicy,
+    EconomyEntry,
+    EconomyLedger,
+    OutcomeReputationPolicy,
+    ReferralPolicy,
+)
+from marketplace.provider_economy import (
+    CapabilityCard,
+    CapabilityDeliveryContract,
+    ProviderQuotePolicy,
+)
+from sdk.autonomous_buyer import (
+    AutonomousBuyerError,
+    AutonomousBuyerPolicy,
+    AutonomousCapabilityBuyer,
+    CapabilityPurchaseResult,
+    PurchasePolicyError,
+)
 
 __all__ = [
     "AgenticTradeAgent",
@@ -26,4 +54,24 @@ __all__ = [
     "OnboardResult",
     "ACFClient",
     "ACFError",
+    "AutonomousBuyerError",
+    "AutonomousBuyerPolicy",
+    "AutonomousCapabilityBuyer",
+    "CapabilityPurchaseResult",
+    "PurchasePolicyError",
+    "CapabilityCard",
+    "CapabilityDeliveryContract",
+    "ProviderQuotePolicy",
+    "CapabilityChainError",
+    "CapabilityChainExecutor",
+    "CapabilityChainPlan",
+    "CapabilityChainResult",
+    "CapabilityChainStep",
+    "CapabilityOutcome",
+    "CompositeCapability",
+    "DynamicPricingPolicy",
+    "EconomyEntry",
+    "EconomyLedger",
+    "OutcomeReputationPolicy",
+    "ReferralPolicy",
 ]
