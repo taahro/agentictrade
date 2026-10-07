@@ -160,10 +160,10 @@ Objective
   -> Capability purchase
   -> Output handoff
   -> Next capability purchase
-  -> Verified chain result
+  -> Auditable chain result
 \`\`\`
 
-The next increments are higher-level economic behavior rather than another marketplace:
+The next increments extend the chain runtime without creating another marketplace:
 
 - result verification hooks and quality gates
 - asynchronous/parallel branches for independent steps
