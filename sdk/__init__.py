@@ -19,6 +19,11 @@ Full client:
 """
 from sdk.client import ACFClient, ACFError
 from sdk.agent import AgenticTradeAgent, AgenticTradeError, OnboardResult
+from marketplace.provider_economy import (
+    CapabilityCard,
+    CapabilityDeliveryContract,
+    ProviderQuotePolicy,
+)
 from sdk.autonomous_buyer import (
     AutonomousBuyerError,
     AutonomousBuyerPolicy,
@@ -38,4 +43,7 @@ __all__ = [
     "AutonomousCapabilityBuyer",
     "CapabilityPurchaseResult",
     "PurchasePolicyError",
+    "CapabilityCard",
+    "CapabilityDeliveryContract",
+    "ProviderQuotePolicy",
 ]
