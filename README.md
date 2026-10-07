@@ -369,6 +369,32 @@ Phase 4 introduces:
 
 A chain is orchestration, not a new marketplace. Discovery, policy, CDP/x402 payment, provider execution, settlement, and receipts remain on the existing AgenticTrade substrate.
 
+### Phase 5 — Agent Economy
+
+The roadmap now reaches the economic layer above individual capability purchases and chains.
+
+Phase 5 adds deterministic primitives for:
+
+- outcome-based capability reputation
+- bounded dynamic pricing from utilization, reputation, and demand
+- agent-to-agent referral rewards
+- composite capabilities with explicit component provenance
+- cross-agent accounting projections
+
+```
+Capability → Outcome → Reputation
+                    ↓
+             Better pricing
+                    ↓
+        Revenue → More capability
+                    ↓
+          Composite capability
+                    ↓
+              New market value
+```
+
+The accounting layer records attribution only. Actual funds movement remains on the existing x402, escrow, and settlement rails.
+
 ### Roadmap
 
 | Phase | Direction |
