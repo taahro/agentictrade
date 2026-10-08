@@ -45,7 +45,7 @@ from payments.nowpayments_provider import NOWPaymentsProvider
 from payments.paypal_provider import PayPalProvider
 from payments.agentkit_provider import AgentKitProvider
 from payments.router import PaymentRouter
-from .routes import services, health, proxy
+from .routes import services, health, proxy, cognosphere
 from .routes import auth as auth_routes
 from .routes import settlement as settlement_routes
 from .routes import identity as identity_routes
@@ -526,6 +526,7 @@ app.include_router(mcp_routes.router, prefix="/api/v1")
 app.include_router(gateway_routes.router)
 app.include_router(negotiation_routes.router, prefix="/api/v1")
 app.include_router(budget_routes.router, prefix="/api/v1")
+app.include_router(cognosphere.router, prefix="/api/v1")
 
 
 @app.get("/api/health")
