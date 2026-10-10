@@ -1,3 +1,13 @@
+---
+title: AgenticTrade API
+emoji: "⚓"
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 8000
+pinned: false
+---
+
 # Agent Commerce Framework (AgenticTrade)
 
 > **Built for the [Agentic Commerce on Arc](https://lablab.ai/event/agentic-commerce-on-arc) Hackathon** — x402 Nanopayments + Circle Programmable Wallets on Arc
