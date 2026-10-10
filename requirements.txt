@@ -24,6 +24,9 @@ anthropic>=0.84.0
 # JWT for KYA identity verification
 pyjwt>=2.8.0
 
+# PostgreSQL production database driver
+psycopg2-binary>=2.9.9
+
 # Testing
 pytest>=7.4.0
 pytest-asyncio>=0.23.0
