@@ -1,0 +1,45 @@
+name: Test Deploy AgenticTrade API to Hugging Face
+
+on:
+  push:
+    branches:
+      - deploy/huggingface-api-space
+    paths:
+      - "README.md"
+      - "Dockerfile"
+      - "requirements.txt"
+      - "api/**"
+      - "src/**"
+      - "app/**"
+      - "templates/**"
+      - "config/**"
+      - ".github/workflows/test-deploy-huggingface.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hf-test-deploy-agentictrade-api
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Sync test branch to Hugging Face Space
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out deployment branch
+        uses: actions/checkout@v6
+        with:
+          ref: deploy/huggingface-api-space
+          fetch-depth: 0
+
+      - name: Sync source to Hugging Face Space
+        uses: huggingface/hub-sync@v0.3.0
+        with:
+          github_repo_id: ${{ github.repository }}
+          huggingface_repo_id: taarhissian/agentictrade-api
+          hf_token: ${{ secrets.HF_TOKEN }}
+          space_sdk: docker
+          private: true
+          delete_removed: false
