@@ -41,3 +41,5 @@ jobs:
           huggingface_repo_id: taarhissian/agentictrade-api
           hf_token: ${{ secrets.HF_TOKEN }}
           space_sdk: docker
+          private: true
+          delete_removed: false
