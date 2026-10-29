@@ -1,0 +1,27 @@
+{
+  "events": [
+    {
+      "tool": "search",
+      "latency_ms": 900,
+      "estimated_cost_usd": 0.002,
+      "success": true,
+      "retry_count": 0
+    },
+    {
+      "tool": "browser",
+      "latency_ms": 2800,
+      "estimated_cost_usd": 0.01,
+      "success": true,
+      "retry_count": 1
+    },
+    {
+      "tool": "search",
+      "latency_ms": 1100,
+      "estimated_cost_usd": 0.002,
+      "success": false,
+      "retry_count": 2
+    }
+  ],
+  "target_latency_ms": 1500,
+  "target_cost_usd": 0.02
+}
