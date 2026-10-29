@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - "api/routes/health.py"
+      - "api/routes/portal.py"
       - ".github/workflows/deploy-agentictrade-hf.yml"
 
 permissions:
@@ -38,6 +39,8 @@ jobs:
         run: |
           test -f api/routes/health.py
           cp api/routes/health.py /tmp/agentictrade-space/api/routes/health.py
+          test -f api/routes/portal.py
+          cp api/routes/portal.py /tmp/agentictrade-space/api/routes/portal.py
           cd /tmp/agentictrade-space
           python - <<'PY'
           from pathlib import Path
@@ -47,9 +50,13 @@ jobs:
               raise SystemExit("Refusing deployment: legacy TemplateResponse call remains")
           if "TemplateResponse(request=request, name=" not in s:
               raise SystemExit("Expected corrected Starlette TemplateResponse signature not found")
-          print("TemplateResponse compatibility check passed")
+          print("Health route TemplateResponse compatibility check passed")
+          portal = Path("api/routes/portal.py").read_text()
+          if "def _render_template(" not in portal or "templates.TemplateResponse(" in portal:
+              raise SystemExit("Portal route still contains legacy TemplateResponse calls")
+          print("Portal route TemplateResponse compatibility check passed")
           PY
-          git add api/routes/health.py
+          git add api/routes/health.py api/routes/portal.py
           if git diff --cached --quiet; then
             echo "No changes to deploy."
             exit 0
