@@ -610,7 +610,7 @@ async def landing(request: Request):
             "SELECT COUNT(*) as cnt FROM agent_identities"
         ).fetchone()["cnt"]
 
-    return _templates.TemplateResponse("public/landing.html", {
+    return _templates.TemplateResponse(request=request, name="public/landing.html", context={
         "request": request,
         "service_count": svc_count,
         "total_calls": total_calls,
@@ -654,7 +654,7 @@ async def marketplace(request: Request):
             svc["description"] = meta.get("desc_zh") or svc["description"]
         services.append(svc)
 
-    return _templates.TemplateResponse("marketplace.html", {
+    return _templates.TemplateResponse(request=request, name="marketplace.html", context={
         "request": request,
         "service_count": len(services),
         "total_calls": total_calls,
@@ -677,7 +677,7 @@ async def pricing(request: Request):
 
     services = [dict(r) for r in svc_rows]
 
-    return _templates.TemplateResponse("public/pricing.html", {
+    return _templates.TemplateResponse(request=request, name="public/pricing.html", context={
         "request": request,
         "services": services,
         **_i18n_ctx(request),
@@ -687,7 +687,7 @@ async def pricing(request: Request):
 @router.get("/providers", response_class=HTMLResponse)
 async def providers(request: Request):
     """Serve the For Providers page."""
-    return _templates.TemplateResponse("public/providers.html", {
+    return _templates.TemplateResponse(request=request, name="public/providers.html", context={
         "request": request,
         **_i18n_ctx(request),
     })
@@ -696,7 +696,7 @@ async def providers(request: Request):
 @router.get("/about", response_class=HTMLResponse)
 async def about(request: Request):
     """Serve the About page."""
-    return _templates.TemplateResponse("public/about.html", {
+    return _templates.TemplateResponse(request=request, name="public/about.html", context={
         "request": request,
         **_i18n_ctx(request),
     })
@@ -705,7 +705,7 @@ async def about(request: Request):
 @router.get("/terms", response_class=HTMLResponse)
 async def terms(request: Request):
     """Serve the Terms of Service page."""
-    return _templates.TemplateResponse("public/terms.html", {
+    return _templates.TemplateResponse(request=request, name="public/terms.html", context={
         "request": request,
         **_i18n_ctx(request),
     })
@@ -714,7 +714,7 @@ async def terms(request: Request):
 @router.get("/privacy", response_class=HTMLResponse)
 async def privacy(request: Request):
     """Serve the Privacy Policy page."""
-    return _templates.TemplateResponse("public/privacy.html", {
+    return _templates.TemplateResponse(request=request, name="public/privacy.html", context={
         "request": request,
         **_i18n_ctx(request),
     })
@@ -725,7 +725,7 @@ async def quality_policy(request: Request):
     """Serve the Quality Policy page — public documentation of quality
     monitoring, scoring thresholds, enforcement actions, and notification
     process for marketplace services."""
-    return _templates.TemplateResponse("public/quality-policy.html", {
+    return _templates.TemplateResponse(request=request, name="public/quality-policy.html", context={
         "request": request,
         **_i18n_ctx(request),
     })
@@ -748,7 +748,7 @@ async def security_txt():
 @router.get("/faq", response_class=HTMLResponse)
 async def faq_page(request: Request):
     """Standalone FAQ page — aggregates all Q&A for SEO/AEO."""
-    return _templates.TemplateResponse("public/faq.html", {
+    return _templates.TemplateResponse(request=request, name="public/faq.html", context={
         "request": request,
         **_i18n_ctx(request),
     })
@@ -762,7 +762,7 @@ async def docs_sub_page(slug: str, request: Request):
     if slug not in _valid_slugs:
         from fastapi.exceptions import HTTPException
         raise HTTPException(status_code=404, detail="Doc page not found")
-    return _templates.TemplateResponse(f"public/docs/{slug}.html", {
+    return _templates.TemplateResponse(request=request, name=f"public/docs/{slug}.html", context={
         "request": request,
         **_i18n_ctx(request),
     })
@@ -797,7 +797,7 @@ async def service_detail_page(service_id: str, request: Request):
     monitor = HealthMonitor(db)
     health = monitor.get_service_health_score(service_id)
 
-    return _templates.TemplateResponse("public/service-detail.html", {
+    return _templates.TemplateResponse(request=request, name="public/service-detail.html", context={
         "request": request,
         "service": svc,
         "health": health,
@@ -831,7 +831,7 @@ async def category_page(category: str, request: Request):
     }
     cat_name = categories.get(category, category.title())
 
-    return _templates.TemplateResponse("public/category.html", {
+    return _templates.TemplateResponse(request=request, name="public/category.html", context={
         "request": request,
         "category": category,
         "category_name": cat_name,
@@ -849,7 +849,7 @@ async def checkout_success(
     provider: str = "",
 ):
     """Post-purchase thank you page."""
-    return _templates.TemplateResponse("checkout-success.html", {
+    return _templates.TemplateResponse(request=request, name="checkout-success.html", context={
         "request": request,
         "session_id": session_id,
         "payment_id": payment_id,
@@ -880,7 +880,7 @@ async def api_docs(request: Request):
         elif "backtest" in name_lower:
             backtest_id = svc["id"]
 
-    return _templates.TemplateResponse("api-docs.html", {
+    return _templates.TemplateResponse(request=request, name="api-docs.html", context={
         "request": request,
         "services": services,
         "demo_service_id": demo_id,
@@ -1022,7 +1022,7 @@ async def status_page(request: Request):
 
     updated_at = now.strftime("%Y-%m-%d %H:%M UTC")
 
-    return _templates.TemplateResponse("public/status.html", {
+    return _templates.TemplateResponse(request=request, name="public/status.html", context={
         "request": request,
         "platform_status": platform_status,
         "uptime_pct": uptime_pct,
@@ -1060,7 +1060,7 @@ async def nano_dashboard(request: Request):
     except Exception:
         pass
 
-    return _templates.TemplateResponse("public/nano-dashboard.html", {
+    return _templates.TemplateResponse(request=request, name="public/nano-dashboard.html", context={
         "request": request,
         "stats": stats,
         **_i18n_ctx(request),
