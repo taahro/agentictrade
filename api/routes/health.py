@@ -24,9 +24,15 @@ def _i18n_ctx(request: Request) -> dict:
     }
 
 def _request_base_url(request: Request) -> str:
-    """Return this deployment's public URL, with an optional explicit override."""
+    """Return this deployment's public HTTPS URL, with an optional override."""
     configured = os.environ.get("PUBLIC_BASE_URL", "").strip().rstrip("/")
-    return configured or str(request.base_url).rstrip("/")
+    if configured:
+        return configured
+    base_url = str(request.base_url).rstrip("/")
+    # Hugging Face terminates TLS at its proxy; the app may see HTTP internally.
+    if base_url.startswith("http://"):
+        base_url = "https://" + base_url[len("http://"):]
+    return base_url
 
 
 _BASE_URL = "https://agentictrade.io"
