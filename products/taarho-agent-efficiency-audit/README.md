@@ -39,7 +39,8 @@ Requires Python 3.10+.
 python -m venv .venv
 source .venv/bin/activate
 pip install fastapi uvicorn pydantic
-uvicorn products.taarho_agent_efficiency_audit.app:app --host 127.0.0.1 --port 8080
+cd products/taarho-agent-efficiency-audit
+uvicorn app:app --host 127.0.0.1 --port 8080
 ```
 
 Then open `/docs` locally or POST the sample payload below to `/audit`.
