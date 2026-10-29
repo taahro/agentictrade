@@ -1,0 +1,36 @@
+name: Taarho Agent Efficiency Audit
+
+on:
+  pull_request:
+    paths:
+      - "products/taarho-agent-efficiency-audit/**"
+      - ".github/workflows/taarho-agent-efficiency-audit.yml"
+  push:
+    branches: [main]
+    paths:
+      - "products/taarho-agent-efficiency-audit/**"
+      - ".github/workflows/taarho-agent-efficiency-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-audit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: products/taarho-agent-efficiency-audit
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: products/taarho-agent-efficiency-audit/requirements.txt
+      - name: Install isolated product dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Run product tests
+        run: pytest -q
