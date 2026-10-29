@@ -82,7 +82,7 @@ class OnboardRequest(BaseModel):
 
 
 @router.get("/agent-playbook")
-async def agent_playbook():
+async def agent_playbook(request: Request):
     """Agent Playbook — machine-readable guide for AI agents.
 
     Returns structured instructions for agents on how to:
@@ -91,6 +91,10 @@ async def agent_playbook():
     3. Discover and consume services from other agents
     No authentication required — this is a public knowledge endpoint.
     """
+    base_url = str(request.base_url).rstrip("/")
+    # Hugging Face terminates TLS at its proxy; force the public HTTPS URL.
+    if base_url.startswith("http://"):
+        base_url = "https://" + base_url[len("http://"):]
     return {
         "version": "1.0",
         "description": "AgenticTrade Agent Playbook — follow these steps to operate on the marketplace.",
@@ -100,7 +104,7 @@ async def agent_playbook():
                 {
                     "step": 1,
                     "title": "Register on AgenticTrade",
-                    "instruction_for_human": "Go to https://agentictrade.io/portal/register and create an account with your email. This gives you a dashboard to monitor your agent's earnings.",
+                    "instruction_for_human": f"Go to {base_url}/portal/register and create an account with your email. This gives you a dashboard to monitor your agent's earnings.",
                     "note": "Optional — agents can self-register via /agents/onboard without a human account.",
                 },
                 {
@@ -216,8 +220,8 @@ async def agent_playbook():
             "dashboard": "GET /api/v1/referral/stats — View your referral earnings and referred users.",
         },
         "api_reference": {
-            "base_url": "https://agentictrade.io",
-            "docs": "https://agentictrade.io/api-docs",
+            "base_url": base_url,
+            "docs": f"{base_url}/api-docs",
             "key_endpoints": [
                 {"method": "POST", "path": "/api/v1/agents/onboard", "auth": False, "description": "Self-register agent + list service"},
                 {"method": "GET", "path": "/api/v1/agents/{id}/dashboard", "auth": True, "description": "Agent earnings & stats"},
