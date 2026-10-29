@@ -88,6 +88,16 @@ async def portal_root():
 templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
 
 
+def _render_template(template_name: str, context: dict, status_code: int = 200) -> HTMLResponse:
+    """Render a portal template using Starlette's current request-first API."""
+    return templates.TemplateResponse(
+        request=context["request"],
+        name=template_name,
+        context=context,
+        status_code=status_code,
+    )
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -201,7 +211,7 @@ async def login_page(request: Request):
         return RedirectResponse("/portal/dashboard", status_code=303)
     ctx = _locale_context(request)
     session = request.cookies.get(_SESSION_COOKIE, "anon")
-    return templates.TemplateResponse("portal/login.html", {
+    return _render_template("portal/login.html", {
         "request": request, **ctx, "error": None,
         "csrf_token": _csrf_token(session),
     })
@@ -222,7 +232,7 @@ async def login_submit(
     # Brute-force protection: DB-backed, works across all workers
     if _check_portal_brute_force(db, client_ip):
         ctx = _locale_context(request)
-        return templates.TemplateResponse("portal/login.html", {
+        return _render_template("portal/login.html", {
             "request": request, **ctx,
             "error": "Too many failed attempts. Please try again later.",
             "csrf_token": _csrf_token(session),
@@ -230,7 +240,7 @@ async def login_submit(
 
     if not _verify_csrf(session, csrf_token):
         ctx = _locale_context(request)
-        return templates.TemplateResponse("portal/login.html", {
+        return _render_template("portal/login.html", {
             "request": request, **ctx, "error": "Invalid request. Please try again.",
             "csrf_token": _csrf_token(session),
         }, status_code=403)
@@ -239,7 +249,7 @@ async def login_submit(
     ctx = _locale_context(request)
 
     if account is None:
-        return templates.TemplateResponse("portal/login.html", {
+        return _render_template("portal/login.html", {
             "request": request, **ctx,
             "error": "Invalid email or password",
             "csrf_token": _csrf_token(session),
@@ -264,7 +274,7 @@ async def register_page(request: Request):
     session = request.cookies.get(_SESSION_COOKIE, "anon")
     ref_code = request.query_params.get("ref", "")
     promo_code = request.query_params.get("promo", "")
-    return templates.TemplateResponse("portal/register.html", {
+    return _render_template("portal/register.html", {
         "request": request, **ctx, "error": None, "success": False,
         "csrf_token": _csrf_token(session),
         "ref_code": ref_code,
@@ -287,7 +297,7 @@ async def register_submit(
     session = request.cookies.get(_SESSION_COOKIE, "anon")
     ctx = _locale_context(request)
     if not _verify_csrf(session, csrf_token):
-        return templates.TemplateResponse("portal/register.html", {
+        return _render_template("portal/register.html", {
             "request": request, **ctx,
             "error": "Invalid request. Please try again.", "success": False,
             "csrf_token": _csrf_token(session), "ref_code": ref_code,
@@ -297,7 +307,7 @@ async def register_submit(
     ensure_provider_accounts_table(db)
 
     if password != confirm_password:
-        return templates.TemplateResponse("portal/register.html", {
+        return _render_template("portal/register.html", {
             "request": request, **ctx,
             "error": "Passwords do not match", "success": False,
             "csrf_token": _csrf_token(session), "ref_code": ref_code,
@@ -310,7 +320,7 @@ async def register_submit(
         from marketplace.promo import validate_promo_code
         is_valid, promo_error, _promo = validate_promo_code(db, promo_code)
         if not is_valid:
-            return templates.TemplateResponse("portal/register.html", {
+            return _render_template("portal/register.html", {
                 "request": request, **ctx,
                 "error": f"Promo code error: {promo_error}", "success": False,
                 "csrf_token": _csrf_token(session), "ref_code": ref_code,
@@ -321,7 +331,7 @@ async def register_submit(
         locale = ctx["locale"]
         account = create_account(db, email, password, display_name, locale)
     except ProviderAccountError as e:
-        return templates.TemplateResponse("portal/register.html", {
+        return _render_template("portal/register.html", {
             "request": request, **ctx,
             "error": str(e), "success": False,
             "csrf_token": _csrf_token(session), "ref_code": ref_code,
@@ -377,7 +387,7 @@ async def verify_email_callback(request: Request, token: str = ""):
     ensure_provider_accounts_table(db)
     success = verify_email(db, token) if token else False
     ctx = _locale_context(request)
-    return templates.TemplateResponse("portal/verify.html", {
+    return _render_template("portal/verify.html", {
         "request": request, **ctx, "success": success,
     })
 
@@ -404,7 +414,7 @@ async def portal_dashboard(request: Request):
     stats = _provider_stats(db, provider["id"])
     session = request.cookies.get(_SESSION_COOKIE, "")
     ctx = _locale_context(request)
-    return templates.TemplateResponse("portal/dashboard.html", {
+    return _render_template("portal/dashboard.html", {
         "request": request, **ctx,
         "provider": provider, "stats": stats,
         "csrf_token": _csrf_token(session),
@@ -419,7 +429,7 @@ async def portal_getting_started(request: Request):
     if not provider:
         return RedirectResponse("/portal/login", status_code=303)
     ctx = _locale_context(request)
-    return templates.TemplateResponse("portal/getting-started.html", {
+    return _render_template("portal/getting-started.html", {
         "request": request, **ctx, "provider": provider,
     })
 
@@ -433,7 +443,7 @@ async def portal_services(request: Request):
     db = request.app.state.db
     stats = _provider_stats(db, provider["id"])
     ctx = _locale_context(request)
-    return templates.TemplateResponse("portal/services.html", {
+    return _render_template("portal/services.html", {
         "request": request, **ctx,
         "provider": provider, "services": stats["services"],
     })
@@ -488,7 +498,7 @@ async def portal_analytics(request: Request):
             commission_tier = "Standard (10%)"
 
     ctx = _locale_context(request)
-    return templates.TemplateResponse("portal/analytics.html", {
+    return _render_template("portal/analytics.html", {
         "request": request, **ctx,
         "provider": provider, "stats": stats,
         "commission_rate": commission_rate,
@@ -510,7 +520,7 @@ async def portal_settings(request: Request):
     # Check for existing PAT token
     pat_info = _get_pat_info(db, provider)
 
-    return templates.TemplateResponse("portal/settings.html", {
+    return _render_template("portal/settings.html", {
         "request": request, **ctx,
         "provider": provider, "success": None, "error": None,
         "csrf_token": _csrf_token(session),
@@ -535,7 +545,7 @@ async def portal_settings_update(
     session = request.cookies.get(_SESSION_COOKIE, "")
     ctx = _locale_context(request)
     if not _verify_csrf(session, csrf_token):
-        return templates.TemplateResponse("portal/settings.html", {
+        return _render_template("portal/settings.html", {
             "request": request, **ctx,
             "provider": provider, "success": None,
             "error": "Invalid request. Please try again.",
@@ -546,7 +556,7 @@ async def portal_settings_update(
     update_profile(db, provider["id"], display_name=display_name, company_name=company_name)
     provider = get_account_by_id(db, provider["id"])
     pat_info = _get_pat_info(db, provider)
-    return templates.TemplateResponse("portal/settings.html", {
+    return _render_template("portal/settings.html", {
         "request": request, **ctx,
         "provider": provider, "success": "Settings updated", "error": None,
         "csrf_token": _csrf_token(session),
@@ -581,7 +591,7 @@ async def portal_referrals(request: Request):
 
     ctx = _locale_context(request)
     session = request.cookies.get(_SESSION_COOKIE, "")
-    return templates.TemplateResponse("portal/referrals.html", {
+    return _render_template("portal/referrals.html", {
         "request": request, **ctx,
         "provider": provider,
         "referral_stats": stats,
@@ -645,7 +655,7 @@ async def portal_budget(request: Request):
 
     session = request.cookies.get(_SESSION_COOKIE, "")
     ctx = _locale_context(request)
-    return templates.TemplateResponse("portal/budget.html", {
+    return _render_template("portal/budget.html", {
         "request": request, **ctx,
         "provider": provider,
         "policy": policy,
@@ -675,7 +685,7 @@ async def portal_budget_update(
     ctx = _locale_context(request)
 
     if not _verify_csrf(session, csrf_token):
-        return templates.TemplateResponse("portal/budget.html", {
+        return _render_template("portal/budget.html", {
             "request": request, **ctx,
             "provider": provider,
             "policy": None, "history": [], "daily_pct": 0, "monthly_pct": 0,
@@ -721,7 +731,7 @@ async def portal_budget_update(
         daily_pct = round(pol["spent_today_usd"] / pol["daily_limit_usd"] * 100, 1) if pol["daily_limit_usd"] > 0 else 0
         monthly_pct = round(pol["spent_month_usd"] / pol["monthly_limit_usd"] * 100, 1) if pol["monthly_limit_usd"] > 0 else 0
 
-        return templates.TemplateResponse("portal/budget.html", {
+        return _render_template("portal/budget.html", {
             "request": request, **ctx,
             "provider": provider,
             "policy": pol, "history": history,
@@ -733,7 +743,7 @@ async def portal_budget_update(
 
     except Exception as e:
         logger.error("Failed to save budget policy for %s: %s", agent_id, e)
-        return templates.TemplateResponse("portal/budget.html", {
+        return _render_template("portal/budget.html", {
             "request": request, **ctx,
             "provider": provider,
             "policy": None, "history": [], "daily_pct": 0, "monthly_pct": 0,
@@ -782,7 +792,7 @@ async def portal_negotiations(request: Request):
     }
 
     ctx = _locale_context(request)
-    return templates.TemplateResponse("portal/negotiations.html", {
+    return _render_template("portal/negotiations.html", {
         "request": request, **ctx,
         "provider": provider,
         "negotiations": all_negs,
@@ -812,7 +822,7 @@ async def portal_reputation(request: Request):
         pass
 
     ctx = _locale_context(request)
-    return templates.TemplateResponse("portal/reputation.html", {
+    return _render_template("portal/reputation.html", {
         "request": request, **ctx,
         "provider": provider,
         "leaderboard": leaderboard,
@@ -850,7 +860,7 @@ async def generate_api_token(request: Request, csrf_token: str = Form("")):
 
     if not _verify_csrf(session, csrf_token):
         pat_info = _get_pat_info(db, provider)
-        return templates.TemplateResponse("portal/settings.html", {
+        return _render_template("portal/settings.html", {
             "request": request, **ctx,
             "provider": provider, "success": None,
             "error": "Invalid request. Please try again.",
@@ -864,7 +874,7 @@ async def generate_api_token(request: Request, csrf_token: str = Form("")):
     # Check for existing PAT
     existing = _get_pat_info(db, provider)
     if existing:
-        return templates.TemplateResponse("portal/settings.html", {
+        return _render_template("portal/settings.html", {
             "request": request, **ctx,
             "provider": provider, "success": None,
             "error": "You already have an API token. Revoke it first to generate a new one.",
@@ -892,7 +902,7 @@ async def generate_api_token(request: Request, csrf_token: str = Form("")):
     new_token = f"{key_id}:{raw_secret}"
     logger.info("PAT generated for provider %s: %s", provider["id"], key_id)
 
-    return templates.TemplateResponse("portal/settings.html", {
+    return _render_template("portal/settings.html", {
         "request": request, **ctx,
         "provider": provider, "success": "API token generated successfully.",
         "error": None,
@@ -916,7 +926,7 @@ async def revoke_api_token(request: Request, csrf_token: str = Form("")):
 
     if not _verify_csrf(session, csrf_token):
         pat_info = _get_pat_info(db, provider)
-        return templates.TemplateResponse("portal/settings.html", {
+        return _render_template("portal/settings.html", {
             "request": request, **ctx,
             "provider": provider, "success": None,
             "error": "Invalid request. Please try again.",
@@ -942,7 +952,7 @@ async def revoke_api_token(request: Request, csrf_token: str = Form("")):
 
     logger.info("PAT revoked for provider %s", provider["id"])
 
-    return templates.TemplateResponse("portal/settings.html", {
+    return _render_template("portal/settings.html", {
         "request": request, **ctx,
         "provider": provider, "success": "API token revoked.",
         "error": None,
@@ -987,7 +997,7 @@ async def portal_create_service(
 
     if not _verify_csrf(session, csrf_token):
         stats = _provider_stats(db, provider["id"])
-        return templates.TemplateResponse("portal/dashboard.html", {
+        return _render_template("portal/dashboard.html", {
             "request": request, **ctx,
             "provider": provider, "stats": stats,
             "csrf_token": _csrf_token(session),
@@ -1056,7 +1066,7 @@ async def portal_create_service(
 
     if errors:
         stats = _provider_stats(db, provider["id"])
-        return templates.TemplateResponse("portal/dashboard.html", {
+        return _render_template("portal/dashboard.html", {
             "request": request, **ctx,
             "provider": provider, "stats": stats,
             "csrf_token": _csrf_token(session),
@@ -1106,7 +1116,7 @@ async def portal_create_service(
     except Exception as e:
         logger.error("Failed to create service: %s", e)
         stats = _provider_stats(db, provider["id"])
-        return templates.TemplateResponse("portal/dashboard.html", {
+        return _render_template("portal/dashboard.html", {
             "request": request, **ctx,
             "provider": provider, "stats": stats,
             "csrf_token": _csrf_token(session),
@@ -1121,7 +1131,7 @@ async def portal_create_service(
         if is_prompt
         else f'Your service "{name}" is now live on the marketplace!'
     )
-    return templates.TemplateResponse("portal/dashboard.html", {
+    return _render_template("portal/dashboard.html", {
         "request": request, **ctx,
         "provider": provider, "stats": stats,
         "csrf_token": _csrf_token(session),
