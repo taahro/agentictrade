@@ -29,17 +29,21 @@ curl -sS -X POST http://127.0.0.1:8080/audit \
 
 ## Marketplace integration
 
-The parent Agent Commerce Framework supports service listings with a per-call price and x402 payment configuration. Before registering this endpoint:
+Follow [MARKETPLACE_REGISTRATION.md](MARKETPLACE_REGISTRATION.md) for the exact registry payload, proxy path, and verification gate.
+
+Important network clarification: the existing `marketplace/payment.py` x402 implementation registers an EVM exact-payment scheme for **Base**. Use Base Sepolia (`eip155:84532`) for the initial test flow, and only consider Base mainnet (`eip155:8453`) after verification. The current implementation should not be described as an Arc payment integration unless the code and deployment configuration are explicitly changed and tested for Arc.
+
+Before registering this endpoint:
 
 1. Deploy the audit API behind HTTPS on a controlled host.
-2. Configure the marketplace's receiving wallet and the chosen x402 network.
-3. Register the service endpoint with a price of `0.25` USDC per call and payment method `x402`.
+2. Configure the marketplace's receiving wallet and verify x402 middleware is actually enabled.
+3. Register the service at the proposed `0.25` USDC per call with payment method `x402`.
 4. Ensure the payment proxy verifies settlement before forwarding the paid request.
-5. Run a testnet transaction, confirm the service response is returned only after successful payment, and check the transaction in the relevant explorer.
-6. Test invalid, missing, replayed, and underpaid payment headers.
-7. Confirm production wallet custody, network fees, privacy terms, rate limits, and monitoring before switching to mainnet.
+5. Complete a testnet payment and confirm the exact audit response is delivered only after successful payment.
+6. Test invalid, missing, replayed, underpaid, and duplicate/idempotency requests.
+7. Confirm wallet custody, fees, privacy terms, rate limits, monitoring, and settlement accounting before switching to mainnet.
 
-Do not use production private keys in source code or commit them to GitHub. Use the deployment platform's secret manager. Do not describe testnet transactions as revenue.
+Do not use production private keys in source code or commit them to GitHub. Use the deployment platform's secret manager. Do not describe testnet transactions as revenue. A service registry entry by itself does not prove checkout is operational.
 
 ## Price
 
