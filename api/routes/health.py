@@ -777,7 +777,7 @@ async def use_case_page(slug: str, request: Request):
     if not os.path.isfile(full_path):
         from fastapi.exceptions import HTTPException
         raise HTTPException(status_code=404, detail="Use case not found")
-    return _templates.TemplateResponse(tpl_path, {
+    return _templates.TemplateResponse(request=request, name=tpl_path, context={
         "request": request,
         **_i18n_ctx(request),
     })
