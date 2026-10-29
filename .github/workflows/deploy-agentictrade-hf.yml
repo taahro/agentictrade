@@ -52,7 +52,7 @@ jobs:
               raise SystemExit("Expected corrected Starlette TemplateResponse signature not found")
           print("Health route TemplateResponse compatibility check passed")
           portal = Path("api/routes/portal.py").read_text()
-          if "def _render_template(" not in portal or "templates.TemplateResponse(" in portal:
+          if "def _render_template(" not in portal or portal.count("templates.TemplateResponse(") != 1:
               raise SystemExit("Portal route still contains legacy TemplateResponse calls")
           print("Portal route TemplateResponse compatibility check passed")
           PY
