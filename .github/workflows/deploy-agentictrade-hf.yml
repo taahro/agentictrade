@@ -2,6 +2,11 @@ name: Deploy AgenticTrade API to Hugging Face
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "api/routes/health.py"
+      - ".github/workflows/deploy-agentictrade-hf.yml"
 
 permissions:
   contents: read
