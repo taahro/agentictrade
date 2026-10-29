@@ -23,6 +23,12 @@ def _i18n_ctx(request: Request) -> dict:
         "supported_locales": SUPPORTED_LOCALES,
     }
 
+def _request_base_url(request: Request) -> str:
+    """Return this deployment's public URL, with an optional explicit override."""
+    configured = os.environ.get("PUBLIC_BASE_URL", "").strip().rstrip("/")
+    return configured or str(request.base_url).rstrip("/")
+
+
 _BASE_URL = "https://agentictrade.io"
 
 
@@ -468,8 +474,9 @@ async def llms_full_txt(request: Request):
 
 
 @router.get("/.well-known/ai-plugin.json")
-async def ai_plugin_json():
+async def ai_plugin_json(request: Request):
     """OpenAI-compatible plugin manifest for agent discovery."""
+    base_url = _request_base_url(request)
     return {
         "schema_version": "v1",
         "name_for_human": "AgenticTrade",
@@ -479,21 +486,22 @@ async def ai_plugin_json():
         "auth": {"type": "service_http", "authorization_type": "bearer"},
         "api": {
             "type": "openapi",
-            "url": f"{_BASE_URL}/api/v1/openapi.json",
+            "url": f"{base_url}/api/v1/openapi.json",
         },
-        "logo_url": f"{_BASE_URL}/static/img/logo.webp",
+        "logo_url": f"{base_url}/static/img/logo.webp",
         "contact_email": "hello@agentictrade.io",
-        "legal_info_url": f"{_BASE_URL}/terms",
+        "legal_info_url": f"{base_url}/terms",
     }
 
 
 @router.get("/.well-known/agents.json")
-async def agents_json():
+async def agents_json(request: Request):
     """ACDP-compatible agent discovery manifest."""
+    base_url = _request_base_url(request)
     return {
         "name": "AgenticTrade",
         "description": "API marketplace for autonomous AI agent commerce. Agents discover, call, and pay for API services.",
-        "url": _BASE_URL,
+        "url": base_url,
         "capabilities": [
             "api_marketplace",
             "service_discovery",
@@ -506,11 +514,11 @@ async def agents_json():
         ],
         "protocols": ["mcp", "x402", "http", "openapi"],
         "endpoints": {
-            "services": f"{_BASE_URL}/api/v1/services",
-            "proxy": f"{_BASE_URL}/api/v1/proxy/{{service_id}}",
-            "balance": f"{_BASE_URL}/api/v1/billing/balance",
-            "register": f"{_BASE_URL}/portal/register",
-            "mcp_registry": f"{_BASE_URL}/api/v1/mcp/registry",
+            "services": f"{base_url}/api/v1/services",
+            "proxy": f"{base_url}/api/v1/proxy/{{service_id}}",
+            "balance": f"{base_url}/api/v1/billing/balance",
+            "register": f"{base_url}/portal/register",
+            "mcp_registry": f"{base_url}/api/v1/mcp/registry",
         },
         "pricing": {
             "model": "pay_per_call",
@@ -529,8 +537,9 @@ async def openai_apps_challenge():
 
 
 @router.get("/.well-known/mcp.json")
-async def mcp_json():
+async def mcp_json(request: Request):
     """MCP auto-discovery manifest. Allows MCP clients to find our server."""
+    base_url = _request_base_url(request)
     return {
         "version": "1.0",
         "servers": [
@@ -541,7 +550,7 @@ async def mcp_json():
                     "and consume API services with autonomous payments via "
                     "x402 USDC on Base, PayPal, and 300+ cryptocurrencies."
                 ),
-                "endpoint": f"{_BASE_URL}/api/v1/mcp",
+                "endpoint": f"{base_url}/api/v1/mcp",
                 "authentication": {
                     "type": "bearer",
                     "description": "Use your AgenticTrade API key as Bearer token",
