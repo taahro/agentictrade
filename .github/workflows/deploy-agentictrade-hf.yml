@@ -1,0 +1,53 @@
+name: Deploy AgenticTrade API to Hugging Face
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agentictrade-hf-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout GitHub source
+        uses: actions/checkout@v4
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Clone Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          test -n "$HF_TOKEN" || (echo "Missing repository secret HF_TOKEN" && exit 1)
+          git clone "https://taarhissian:${HF_TOKEN}@huggingface.co/spaces/taarhissian/agentictrade-api" /tmp/agentictrade-space
+
+      - name: Sync corrected health route
+        run: |
+          test -f api/routes/health.py
+          cp api/routes/health.py /tmp/agentictrade-space/api/routes/health.py
+          cd /tmp/agentictrade-space
+          python - <<'PY'
+          from pathlib import Path
+          p = Path("api/routes/health.py")
+          s = p.read_text()
+          if 'TemplateResponse("public/landing.html", {' in s or 'TemplateResponse(tpl_path, {' in s:
+              raise SystemExit("Refusing deployment: legacy TemplateResponse call remains")
+          if "TemplateResponse(request=request, name=" not in s:
+              raise SystemExit("Expected corrected Starlette TemplateResponse signature not found")
+          print("TemplateResponse compatibility check passed")
+          PY
+          git add api/routes/health.py
+          if git diff --cached --quiet; then
+            echo "No changes to deploy."
+            exit 0
+          fi
+          git commit -m "Fix Starlette TemplateResponse compatibility"
+          git push origin HEAD:main
