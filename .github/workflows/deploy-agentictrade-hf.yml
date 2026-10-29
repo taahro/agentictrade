@@ -7,6 +7,7 @@ on:
     paths:
       - "api/routes/health.py"
       - "api/routes/portal.py"
+      - "api/routes/agents.py"
       - ".github/workflows/deploy-agentictrade-hf.yml"
 
 permissions:
@@ -41,6 +42,8 @@ jobs:
           cp api/routes/health.py /tmp/agentictrade-space/api/routes/health.py
           test -f api/routes/portal.py
           cp api/routes/portal.py /tmp/agentictrade-space/api/routes/portal.py
+          test -f api/routes/agents.py
+          cp api/routes/agents.py /tmp/agentictrade-space/api/routes/agents.py
           cd /tmp/agentictrade-space
           python - <<'PY'
           from pathlib import Path
@@ -55,8 +58,14 @@ jobs:
           if "def _render_template(" not in portal or portal.count("templates.TemplateResponse(") != 1:
               raise SystemExit("Portal route still contains legacy TemplateResponse calls")
           print("Portal route TemplateResponse compatibility check passed")
+          agents = Path("api/routes/agents.py").read_text()
+          if "async def agent_playbook(request: Request)" not in agents:
+              raise SystemExit("Agent playbook must receive the current request")
+          if "https://agentictrade.io/portal/register" in agents or '"base_url": "https://agentictrade.io"' in agents:
+              raise SystemExit("Agent playbook still points at upstream production URLs")
+          print("Agent playbook deployment URL check passed")
           PY
-          git add api/routes/health.py api/routes/portal.py
+          git add api/routes/health.py api/routes/portal.py api/routes/agents.py
           if git diff --cached --quiet; then
             echo "No changes to deploy."
             exit 0
